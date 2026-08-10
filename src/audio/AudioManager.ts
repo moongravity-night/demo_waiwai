@@ -34,6 +34,7 @@ interface PlayOptions {
 export class AudioManager {
   enabled = true;
   private countdown?: HTMLAudioElement;
+  private countdownWindowActive = false;
   private readonly activeSounds = new Set<HTMLAudioElement>();
   private readonly scheduledSounds = new Set<number>();
   private readonly preloadedSounds: HTMLAudioElement[];
@@ -92,12 +93,18 @@ export class AudioManager {
       this.stopCountdown();
       return;
     }
-    if (this.countdown) return;
+    if (this.countdownWindowActive) return;
 
+    this.countdownWindowActive = true;
     const countdown = this.createAudio(SOUND_URLS.countdown, 0.16);
     this.countdown = countdown;
-    void countdown.play().catch(() => {
+    const release = (): void => {
       if (this.countdown === countdown) this.countdown = undefined;
+    };
+    countdown.addEventListener("ended", release, { once: true });
+    countdown.addEventListener("error", release, { once: true });
+    void countdown.play().catch(() => {
+      release();
     });
   }
 
@@ -145,6 +152,7 @@ export class AudioManager {
   }
 
   private stopCountdown(): void {
+    this.countdownWindowActive = false;
     if (!this.countdown) return;
     this.countdown.pause();
     this.countdown.currentTime = 0;

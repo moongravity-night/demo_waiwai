@@ -62,4 +62,27 @@ describe("AudioManager countdown", () => {
     expect(manager.toggle()).toBe(false);
     expect(countdown?.paused).toBe(true);
   });
+
+  it("does not retry during the same countdown window after play rejects", async () => {
+    class RejectingAudio extends FakeAudio {
+      override play(): Promise<void> {
+        this.playCount += 1;
+        return Promise.reject(new Error("playback interrupted"));
+      }
+    }
+    vi.stubGlobal("Audio", RejectingAudio);
+    const manager = new AudioManager();
+
+    manager.syncCountdown(true);
+    await Promise.resolve();
+    manager.syncCountdown(true);
+    manager.syncCountdown(true);
+
+    const attempts = RejectingAudio.instances.filter((audio) => audio.playCount > 0);
+    expect(attempts).toHaveLength(1);
+
+    manager.syncCountdown(false);
+    manager.syncCountdown(true);
+    expect(RejectingAudio.instances.filter((audio) => audio.playCount > 0)).toHaveLength(2);
+  });
 });
