@@ -1,10 +1,11 @@
-import "pixi.js/accessibility";
+import "pixi.js/browser";
 import {
   Application,
   AccessibilitySystem,
   Container,
   Graphics,
   GraphicsContext,
+  WebGLRenderer,
   type Ticker,
 } from "pixi.js";
 import type { BoardState, Tetromino, TetrominoType } from "../types/game";
@@ -74,6 +75,7 @@ export class PixiGame {
   ) {}
 
   async init(board: BoardState): Promise<void> {
+    document.documentElement.dataset.preferredRenderer = WebGLRenderer.name;
     AccessibilitySystem.defaultOptions.deactivateOnMouseMove = true;
     AccessibilitySystem.defaultOptions.activateOnTab = true;
     AccessibilitySystem.defaultOptions.enabledByDefault = false;
@@ -87,6 +89,7 @@ export class PixiGame {
       failIfMajorPerformanceCaveat: false,
       powerPreference: "high-performance",
       eventFeatures: { move: true, globalMove: false, click: true, wheel: false },
+      skipExtensionImports: true,
     });
 
     this.app.canvas.className = "pixi-canvas";
