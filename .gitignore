@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.vite/
+coverage/
+.agents/
+test.txt
+_Anti-Tetris_Selected/05_ambient/
+_Anti-Tetris_Selected/06_optional_timer/
